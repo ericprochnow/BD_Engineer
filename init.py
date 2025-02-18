@@ -1,3 +1,3 @@
 import nuke
 
-nuke.pluginAddPath('BD_Engineer')
+nuke.pluginAddPath('./BD_Engineer')
