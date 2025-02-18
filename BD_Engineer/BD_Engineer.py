@@ -220,7 +220,7 @@ class BD_Engineer(QtWidgets.QWidget):
 
         # Credit text
         self.website = "<a href='https://ericprochnow.com' style='text-decoration:none; color:#ffffff;'>"
-        self.creditLabel = QtWidgets.QLabel(f"BD Engineer V01 <br><br> © 2025 by {self.website}Eric Prochnow</a><br>")
+        self.creditLabel = QtWidgets.QLabel(f"BD Engineer v1.0 <br><br> © 2025 by {self.website}Eric Prochnow</a><br>")
 
         # Ensure rich text format is used
         self.creditLabel.setTextFormat(QtCore.Qt.TextFormat.RichText)
