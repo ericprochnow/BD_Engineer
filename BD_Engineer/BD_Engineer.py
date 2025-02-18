@@ -1,10 +1,9 @@
 #------------------------------------------------------
 # BD_Engineer
 # Advanced Backdrop Tool for Nuke
-# created by Eric Prochnow
+# created by Eric Prochnow (ericprochnow.com)
 version = '1.0'
 releaseDate = 'Feb 16 2025'
-
 #-----------------------------------------------------    
 
 from PySide2 import QtCore, QtGui, QtWidgets
@@ -20,19 +19,22 @@ import re
 # ----------------------------------------------
 
 
-# Define the path to your icons folder
+import ui_settings
 
-# Option 1: Use Nukes default icons
-nukePATH = os.path.dirname(nuke.EXE_PATH)
-icons_path = f"{nukePATH}/plugins/icons"
+# button size
+button_width = ui_settings.button_width
+button_height = ui_settings.button_height
+button_spacing = ui_settings.button_spacing
+settings_button = ui_settings.main_title_size
 
-# Option 2: Use your own icons
-# icons_path = r"C:\link\to\your\icon\folder\goes\here"
+# settings grid
+icons_path = ui_settings.icons_path
+combo_icons_size = ui_settings.main_title_size*2
+padding = ui_settings.title_size
 
-
-# Define Button size (change if needed)
-button_width = 50
-button_height = 15
+# text size
+main_title_size = ui_settings.main_title_size
+title_size = ui_settings.title_size
 
 
 # ----------------------------------------------
@@ -88,7 +90,6 @@ class BD_Engineer(QtWidgets.QWidget):
 
         # --- UI Window Settings ---
         self.setWindowTitle("BD_Engineer")
-        self.setGeometry(100, 100, 100, 100)
         # Keep window always on top
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
 
@@ -105,7 +106,7 @@ class BD_Engineer(QtWidgets.QWidget):
         # --- Main Title  ---
         self.sectionTitle = QtWidgets.QLabel("BD Engineer")
         self.sectionTitle.setAlignment(QtCore.Qt.AlignCenter)
-        self.sectionTitle.setStyleSheet("font-size: 12px; font-weight: bold;")
+        self.sectionTitle.setStyleSheet(f"font-size: {main_title_size}px; font-weight: bold;")
         self.mainLayout.addWidget(self.sectionTitle)
 
 
@@ -114,7 +115,7 @@ class BD_Engineer(QtWidgets.QWidget):
         # --- Subtitle 1 ("Create Backdrop") ---
         self.sectionSubtitle_bd = QtWidgets.QLabel("Create Backdrop")
         self.sectionSubtitle_bd.setAlignment(QtCore.Qt.AlignCenter)
-        self.sectionSubtitle_bd.setStyleSheet("font-size: 8px")
+        self.sectionSubtitle_bd.setStyleSheet(f"font-size: {title_size}px")
         self.mainLayout.addWidget(self.sectionSubtitle_bd)
 
 
@@ -123,7 +124,7 @@ class BD_Engineer(QtWidgets.QWidget):
         # --- Backdrop Button Section ---
         self.bd_button_width = button_width
         self.bd_button_height = button_height
-        self.bd_button_spacing = 8
+        self.bd_button_spacing = button_spacing
         
         self.buttonLayout = QtWidgets.QVBoxLayout()
         self.buttonLayout.setSpacing(self.bd_button_spacing)  
@@ -135,7 +136,7 @@ class BD_Engineer(QtWidgets.QWidget):
 
             button.setStyleSheet(
             f"""
-            QPushButton{{background-color: {btn['color']}; color: white; font-size: 8px}}"
+            QPushButton{{background-color: {btn['color']}; color: white; font-size: {title_size}px}}"
             QToolTip {{background: transparent; color: white; border: none}}
             """)
 
@@ -165,11 +166,10 @@ class BD_Engineer(QtWidgets.QWidget):
 
 
 
-
-        # --- Subtitle 2 ("Modify Backdrop" ---
+        # --- Subtitle 2 ("Modify Backdrop") ---
         self.sectionSubtitle_modify = QtWidgets.QLabel("Modify Backdrop")
         self.sectionSubtitle_modify.setAlignment(QtCore.Qt.AlignCenter)
-        self.sectionSubtitle_modify.setStyleSheet("font-size: 8px")
+        self.sectionSubtitle_modify.setStyleSheet(f"font-size: {title_size}px")
         self.mainLayout.addWidget(self.sectionSubtitle_modify)
         
 
@@ -220,12 +220,12 @@ class BD_Engineer(QtWidgets.QWidget):
 
         # Credit text
         self.website = "<a href='https://ericprochnow.com' style='text-decoration:none; color:#ffffff;'>"
-        self.creditLabel = QtWidgets.QLabel(f"BD Engineer v1.0 <br><br> © 2025 by {self.website}Eric Prochnow</a><br>")
+        self.creditLabel = QtWidgets.QLabel(f"BD Engineer V01 <br><br> © 2025 by {self.website}Eric Prochnow</a><br>")
 
         # Ensure rich text format is used
         self.creditLabel.setTextFormat(QtCore.Qt.TextFormat.RichText)
         self.creditLabel.setOpenExternalLinks(True)
-        self.creditLabel.setStyleSheet("QLabel {font-size:6px; line-height: 12px;}")
+        self.creditLabel.setStyleSheet(f"QLabel {{font-size:{title_size}px; line-height: 12px;}}")
         self.creditLabel.setAlignment(QtCore.Qt.AlignCenter)
         
         # Settings Button Layout
@@ -236,9 +236,9 @@ class BD_Engineer(QtWidgets.QWidget):
         icon_path = find_nuke_icon("SettingsButton.png")
 
         self.settingsButton = QtWidgets.QPushButton()
-        self.settingsButton.setFixedSize(12,12)
+        self.settingsButton.setFixedSize(settings_button,settings_button)
         self.settingsButton.setIcon(QtGui.QIcon(icon_path))
-        self.settingsButton.setIconSize(QtCore.QSize( 10,  10))
+        self.settingsButton.setIconSize(QtCore.QSize( settings_button-2,  settings_button-2))
         self.settingsButton.clicked.connect(self.open_settings)
         self.settingsButtonLayout.addWidget(self.settingsButton)
 
@@ -290,7 +290,7 @@ class BD_Engineer(QtWidgets.QWidget):
 
 class ConfigEditor(QtWidgets.QDialog):
 
-    def __init__(self, config_path, available_icons, icons_path, parent=None):
+    def __init__(self, config_path, available_icons, icons_path, combo_icons_size, parent=None):
         super(ConfigEditor, self).__init__(parent)
         self.config_path = config_path
         self.setWindowTitle("Edit Backdrop Buttons")
@@ -308,25 +308,32 @@ class ConfigEditor(QtWidgets.QDialog):
         self.available_icons.insert(0, "")
 
         # Define Size for the icon selection section
-        self.ICON_SIZE = 24  # Set the desired icon size
-        self.icon_combobox_width = self.ICON_SIZE + 25 
-        self.icon_combobox_height = self.ICON_SIZE + 5
+        self.ICON_SIZE = combo_icons_size  # Set the desired icon size
+        self.icon_combobox_width = self.ICON_SIZE * 2
+        self.icon_combobox_height = self.ICON_SIZE
 
         # Create a table to display each button's properties
         self.table = QtWidgets.QTableWidget(self)
         self.table.setColumnCount(5)
         self.table.setHorizontalHeaderLabels(["Button Text", "Color", "Tooltip", "Icon", "Backdrop Label Text"])
+        self.table.setStyleSheet(f"font-size: {title_size}px")
 
 
-        # Disable resizing of columns and rows
-        self.table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
-        self.table.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
+        # Set row height dynamically (add padding based on font size)
+        row_height = self.ICON_SIZE
+        self.table.verticalHeader().setDefaultSectionSize(row_height)
+
+        # Increase horizontal header padding
+        header = self.table.horizontalHeader()
+        header.setStyleSheet(f"QHeaderView::section {{ padding: {padding}px; font-size: {title_size}px; }}")
+
+        # Ensure headers resize automatically based on content
+        header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)      
 
         # Prevent stretching of last section to keep layout fixed
         self.table.horizontalHeader().setStretchLastSection(False)
         self.table.verticalHeader().setStretchLastSection(False)
-                
-        
+
         # Load current configuration from config.py
         self.load_data()
         
@@ -400,8 +407,8 @@ class ConfigEditor(QtWidgets.QDialog):
 
         # Create the QComboBox with fixed size
             icon_dropdown = QtWidgets.QComboBox()
-            icon_dropdown.setIconSize(QtCore.QSize( self.ICON_SIZE,  self.ICON_SIZE))  # Set icon size
-            icon_dropdown.setFixedSize( self.icon_combobox_width,  self.icon_combobox_height)  # Adjust dropdown size
+            icon_dropdown.setIconSize(QtCore.QSize( self.ICON_SIZE,  self.ICON_SIZE))  
+            icon_dropdown.setFixedSize( self.icon_combobox_width,  self.icon_combobox_height) 
 
         # Populate dropdown with icons
         for icon_name in self.available_icons:
@@ -422,14 +429,14 @@ class ConfigEditor(QtWidgets.QDialog):
         if selected:
             row = selected[0].row()
             self.table.removeRow(row)
-            self.adjust_window_size()  # Adjust window size after removing a row
+            self.adjust_window_size()  
 
     def save(self):
         buttons = []
         for row in range(self.table.rowCount()):
-            icon_widget = self.table.cellWidget(row, 3)  # Get the QComboBox
-            selected_icon = icon_widget.currentData() if icon_widget else ""  # Retrieve filename
-            full_icon_path = f"{self.icons_path}/{selected_icon}" if selected_icon else ""  # Ensure proper path
+            icon_widget = self.table.cellWidget(row, 3)  
+            selected_icon = icon_widget.currentData() if icon_widget else ""  
+            full_icon_path = f"{self.icons_path}/{selected_icon}" if selected_icon else ""
 
             button = {
                 "label": self.table.item(row, 0).text() if self.table.item(row, 0) else "",
@@ -459,20 +466,20 @@ class ConfigEditor(QtWidgets.QDialog):
         """Adjust the window size dynamically based on table content."""
         row_height = self.table.verticalHeader().defaultSectionSize()  # Height of one row
         row_count = self.table.rowCount()
-        table_height = (row_count * row_height) + 50  # Add some padding
+        table_height = (row_count * row_height) + 50 + padding*2 # Add some padding
 
         # Get column widths to determine window width
-        total_width = sum(self.table.columnWidth(i) for i in range(self.table.columnCount())) + 50
+        total_width = sum(self.table.columnWidth(i) for i in range(self.table.columnCount())) + padding*6
 
         # Set fixed size
-        self.setFixedSize(total_width, table_height + 20)  # Add extra space for buttons
+        self.resize(total_width, table_height + padding*4)  # Add extra space for buttons
 
 # Launch ConfigEditor UI Window via settings Button
 def open_config_editor():
 
     config_path = os.path.join(os.path.dirname(__file__), "buttons_config.py")
 
-    dlg = ConfigEditor(config_path,available_icons,icons_path)
+    dlg = ConfigEditor(config_path,available_icons,icons_path,combo_icons_size)
     if dlg.exec_():
         print("Backdrop Buttons updated!")
 
@@ -534,26 +541,29 @@ def createBackdrop(icon, text, color):
 
     input_text = nuke.getInput('Backdrop Title:', f"{text}" )
 
-    n = nuke.createNode("BackdropNode", inpanel=False)
-    n["tile_color"].setValue(hex_to_nuke_color(color))
-    n["note_font"].setValue("Arial")
-    n["note_font_size"].setValue(50)
-    n["z_order"].setValue(zOrder)
-
-    if icon == "": 
-        n["label"].setValue(f"<center>{input_text}</center>")
+    if not input_text:
+        return
     else:
-        icon = icon.replace(os.sep, "/")
-        n["label"].setValue(f"<center><img src='{icon}'>{input_text}</center>")
+        n = nuke.createNode("BackdropNode", inpanel=False)
+        n["tile_color"].setValue(hex_to_nuke_color(color))
+        n["note_font"].setValue("Arial")
+        n["note_font_size"].setValue(50)
+        n["z_order"].setValue(zOrder)
 
-    n['xpos'].setValue(bdX)
-    n['ypos'].setValue(bdY)
-    n['bdwidth'].setValue(bdW)
-    n['bdheight'].setValue(bdH)
-    n['selected'].setValue(True)
+        if icon == "": 
+            n["label"].setValue(f"<center>{input_text}</center>")
+        else:
+            icon = icon.replace(os.sep, "/")
+            n["label"].setValue(f"<center><img src='{icon}'>{input_text}</center>")
 
-    for node in sel:
-        node['selected'].setValue(True)
+        n['xpos'].setValue(bdX)
+        n['ypos'].setValue(bdY)
+        n['bdwidth'].setValue(bdW)
+        n['bdheight'].setValue(bdH)
+        n['selected'].setValue(True)
+
+        for node in sel:
+            node['selected'].setValue(True)
 
 def scaleUp(nodes, step=50):
     """
