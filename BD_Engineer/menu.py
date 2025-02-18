@@ -1,7 +1,7 @@
 import nuke
 
 # --------------------------------------------------------------------------------------------
-# # Choose how you want to use the tool in Nuke. Only one option is possible
+# # Choose how you want to use the tool in Nuke. Only one option is possible.
 # --------------------------------------------------------------------------------------------
 
 
