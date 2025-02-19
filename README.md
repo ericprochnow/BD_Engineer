@@ -26,3 +26,6 @@ ______
 - make the tool accessable as floating window via shortcut or as dockable panel widget. Select one option inside the BD_Engineer menu.py file by commenting (#) the one you don't want to use
   
 - modify the ui_settings.py file to your individual needs (change icon directory, text- and button size)  
+______
+
+# How to install & use (video guide)
