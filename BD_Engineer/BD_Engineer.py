@@ -225,7 +225,7 @@ class BD_Engineer(QtWidgets.QWidget):
         # Ensure rich text format is used
         self.creditLabel.setTextFormat(QtCore.Qt.TextFormat.RichText)
         self.creditLabel.setOpenExternalLinks(True)
-        self.creditLabel.setStyleSheet(f"QLabel {{font-size:9px; line-height: 12px;}}")
+        self.creditLabel.setStyleSheet(f"QLabel {{font-size:10px; line-height: 12px;}}")
         self.creditLabel.setAlignment(QtCore.Qt.AlignCenter)
         
         # Settings Button Layout
@@ -364,12 +364,13 @@ class ConfigEditor(QtWidgets.QDialog):
         self.adjust_window_size()
         
     def load_data(self):
+        """Load backdrop variable data from the buttons config file"""
         buttons = buttons_config.BUTTONS
         self.table.setRowCount(len(buttons))
         
         for row, button in enumerate(buttons):
             self.table.setItem(row, 0, QtWidgets.QTableWidgetItem(button.get("label", "")))
-            self.table.setItem(row, 1, QtWidgets.QTableWidgetItem(button.get("color", "")))
+            self.add_color_picker(row, 1, button.get("color", "")) 
             self.table.setItem(row, 2, QtWidgets.QTableWidgetItem(button.get("tooltip", "")))
 
             # Extract filename from stored full path (e.g., ":icons/icon.png" → "icon.png")
@@ -378,8 +379,8 @@ class ConfigEditor(QtWidgets.QDialog):
 
             # Create the QComboBox with fixed size
             icon_dropdown = QtWidgets.QComboBox()
-            icon_dropdown.setIconSize(QtCore.QSize( self.ICON_SIZE,  self.ICON_SIZE))  # Set icon size
-            icon_dropdown.setFixedSize( self.icon_combobox_width,  self.icon_combobox_height)  # Adjust dropdown size
+            icon_dropdown.setIconSize(QtCore.QSize( self.ICON_SIZE,  self.ICON_SIZE))
+            icon_dropdown.setFixedSize( self.icon_combobox_width,  self.icon_combobox_height)
 
             # Populate dropdown with icons
             for icon_name in self.available_icons:
@@ -398,17 +399,41 @@ class ConfigEditor(QtWidgets.QDialog):
 
             self.table.setItem(row, 4, QtWidgets.QTableWidgetItem(button.get("text", "")))
 
+    def add_color_picker(self, row, col, initial_color):
+        """Color Picker Icon to select the color for button / backdrop"""
+        color_button = QtWidgets.QPushButton()
+        color_button.setFixedSize(self.icon_combobox_width, self.icon_combobox_height)
+        color_button.setStyleSheet(f"background-color: {initial_color}; border: 1px solid black;")
+
+        color_button.setProperty("hex_color", initial_color)  
+
+        color_button.clicked.connect(lambda: self.open_color_dialog(color_button))
+
+        self.table.setCellWidget(row, col, color_button)
+
+    def open_color_dialog(self, button):
+        """Color Picker function."""
+        color = QtWidgets.QColorDialog.getColor()
+        if color.isValid():
+            hex_color = color.name()  
+            button.setStyleSheet(f"background-color: {hex_color}; border: 1px solid black;")
+            button.setProperty("hex_color", hex_color) 
+
     def add_row(self):
+        """Add rows to the table to create new Buttons"""
         row = self.table.rowCount()
         self.table.insertRow(row)
 
-        for col in [0, 1, 2, 4]:  
+        for col in [0, 2, 4]:  
             self.table.setItem(row, col, QtWidgets.QTableWidgetItem(""))
 
+        # add color picker
+        self.add_color_picker(row, 1, "#3D3D3D")
+
         # Create the QComboBox with fixed size
-            icon_dropdown = QtWidgets.QComboBox()
-            icon_dropdown.setIconSize(QtCore.QSize( self.ICON_SIZE,  self.ICON_SIZE))  
-            icon_dropdown.setFixedSize( self.icon_combobox_width,  self.icon_combobox_height) 
+        icon_dropdown = QtWidgets.QComboBox()
+        icon_dropdown.setIconSize(QtCore.QSize( self.ICON_SIZE,  self.ICON_SIZE))  
+        icon_dropdown.setFixedSize( self.icon_combobox_width,  self.icon_combobox_height) 
 
         # Populate dropdown with icons
         for icon_name in self.available_icons:
@@ -421,35 +446,44 @@ class ConfigEditor(QtWidgets.QDialog):
             icon_dropdown.setCurrentIndex(0)
 
         self.adjust_window_size()
-
+        
         self.table.setCellWidget(row, 3, icon_dropdown)
 
     def remove_selected_row(self):
+        """Remove selected rows from the table"""
         selected = self.table.selectedItems()
-        if selected:
-            row = selected[0].row()
+        for i in selected:
+            row = i.row()
             self.table.removeRow(row)
             self.adjust_window_size()  
 
     def save(self):
+        """Export the table data to buttens config file."""
         buttons = []
         for row in range(self.table.rowCount()):
             icon_widget = self.table.cellWidget(row, 3)  
             selected_icon = icon_widget.currentData() if icon_widget else ""  
             full_icon_path = f"{self.icons_path}/{selected_icon}" if selected_icon else ""
+            color_button = self.table.cellWidget(row, 1)
+            selected_color = color_button.property("hex_color") if color_button else "#3D3D3D"
 
             button = {
                 "label": self.table.item(row, 0).text() if self.table.item(row, 0) else "",
-                "color": self.table.item(row, 1).text() if self.table.item(row, 1) else "",
+                "color": selected_color,
                 "tooltip": self.table.item(row, 2).text() if self.table.item(row, 2) else "",
-                "icon": full_icon_path,  # Save the full path so it loads correctly
-                "text": self.table.item(row, 4).text() if self.table.item(row, 4) else ""
+                "icon": full_icon_path,
+                "text": self.table.item(row, 4).text() if self.table.item(row, 4) else "",
             }
             buttons.append(button)
 
 
         # Write the new configuration to buttons_config.py
-        new_config_text = "BUTTONS = " + repr(buttons)
+        new_config_text = "BUTTONS = [\n"
+
+        for button in buttons:
+            new_config_text += f"    {repr(button)},\n\n"
+            
+        new_config_text += "]\n"
         try:
             with open(self.config_path, "w") as f:
                 f.write(new_config_text)
