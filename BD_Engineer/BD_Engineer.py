@@ -225,7 +225,7 @@ class BD_Engineer(QtWidgets.QWidget):
         # Ensure rich text format is used
         self.creditLabel.setTextFormat(QtCore.Qt.TextFormat.RichText)
         self.creditLabel.setOpenExternalLinks(True)
-        self.creditLabel.setStyleSheet(f"QLabel {{font-size:{title_size}px; line-height: 12px;}}")
+        self.creditLabel.setStyleSheet(f"QLabel {{font-size:9px; line-height: 12px;}}")
         self.creditLabel.setAlignment(QtCore.Qt.AlignCenter)
         
         # Settings Button Layout
