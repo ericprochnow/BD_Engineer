@@ -151,6 +151,7 @@ class BD_Engineer(QtWidgets.QWidget):
         self.buttonContainer.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self.mainLayout.addWidget(self.buttonContainer, alignment=QtCore.Qt.AlignCenter)
 
+        self.mainLayout.addSpacing(20)
 
 
 
@@ -162,7 +163,7 @@ class BD_Engineer(QtWidgets.QWidget):
         self.mainLayout.addWidget(self.separator)
 
         # Add space before Modify Backdrop title
-        self.mainLayout.addSpacing(10)
+        self.mainLayout.addSpacing(20)
 
 
 
@@ -177,7 +178,7 @@ class BD_Engineer(QtWidgets.QWidget):
 
         # --- Modify Button Section ---
         self.modifyButtonLayout = QtWidgets.QGridLayout()
-        self.modifyButtonLayout.setSpacing(5)  # Spacing between buttons
+        self.modifyButtonLayout.setSpacing(5)
         self.modifyButtonLayout.setContentsMargins(0, 10, 0, 10)
 
         # Define button labels and function placeholders
@@ -216,6 +217,43 @@ class BD_Engineer(QtWidgets.QWidget):
 
 
 
+        # --- Label Pos Button Section ---
+        self.labelPosLayout = QtWidgets.QGridLayout()
+        self.labelPosLayout.setSpacing(5)  
+        self.labelPosLayout.setContentsMargins(0, 10, 0, 10)
+
+        # Define button labels and function placeholders
+        labelPos_button_data = [
+            ("1", self.label_left, "Align backdrop label text to the left."),
+            ("2", self.label_center, "Align backdrop label text to the center."),
+            ("3",  self.label_right,"Align backdrop label text to the right."),
+            ]
+        
+        self.labelPosButtons = []
+        positions = [(0, 0), (0, 1), (0, 2)]
+
+        for pos, (label, function, tooltip) in zip(positions, labelPos_button_data):
+            button = QtWidgets.QPushButton(label)
+            button.setFixedSize(self.bd_button_width / 2 , self.bd_button_height)
+            button.setToolTip(tooltip)
+            button.clicked.connect(function)
+            self.labelPosLayout.addWidget(button, *pos)
+            self.labelPosButtons.append(button)
+
+
+        # Create a container for label Pos buttons
+        self.labelPosContainer = QtWidgets.QWidget()
+        self.labelPosContainer.setLayout(self.labelPosLayout)
+        self.labelPosContainer.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+
+        self.mainLayout.addWidget(self.labelPosContainer, alignment=QtCore.Qt.AlignCenter)
+
+        # Add space after modify buttons
+        self.mainLayout.addSpacing(30)
+
+
+
+
         # --- Bottom Layout Section ---
 
         # Credit text
@@ -238,7 +276,7 @@ class BD_Engineer(QtWidgets.QWidget):
         self.settingsButton = QtWidgets.QPushButton()
         self.settingsButton.setFixedSize(settings_button,settings_button)
         self.settingsButton.setIcon(QtGui.QIcon(icon_path))
-        self.settingsButton.setIconSize(QtCore.QSize( settings_button-2,  settings_button-2))
+        self.settingsButton.setIconSize(QtCore.QSize( settings_button,  settings_button))
         self.settingsButton.clicked.connect(self.open_settings)
         self.settingsButtonLayout.addWidget(self.settingsButton)
 
@@ -282,6 +320,15 @@ class BD_Engineer(QtWidgets.QWidget):
 
     def randomizeColor(self):
         randomizeBackdropColor(nuke.selectedNodes())
+    
+    def label_left(self):
+        label_left(nuke.selectedNodes())
+
+    def label_center(self):
+        label_center(nuke.selectedNodes())
+
+    def label_right(self):
+        label_right(nuke.selectedNodes())
 
     def open_settings(self):
         open_config_editor()
@@ -740,6 +787,111 @@ def randomizeBackdropColor(nodes):
     for node in backdrop_nodes:
         random_color = random.randint(0, 0xFFFFFF)  # Generate a random RGB color
         node["tile_color"].setValue(random_color)
+
+
+
+def get_label_param(node):
+
+    if node.Class() == "BackdropNode":
+
+        # get label value
+        text = node["label"].value()
+        
+        # get alignment
+        align = re.search(r"<(left|center|right)>\s*(.*?)\s*</\1>", text).group(1)
+        
+        # get icon
+        match_img = re.search(r"(<img .*?>)", text)
+        if match_img:
+            icon = match_img.group(1)
+        else:
+            icon = ""
+
+        # get label text
+        if icon != "":
+            match_title = re.search(r"<(center|left|right)>.*?>(.*?)</\1>", text)
+            title = match_title.group(2)
+        else:
+            match_title = re.search(r"<(center|left|right)>(.*?)</\1>", text)
+            title = match_title.group(2)
+
+        
+        return text, align, icon, title
+    
+    else:
+        print("no backdrop sel!")
+        return
+    
+
+
+
+
+def label_left(nodes):
+    backdrop_nodes = [node for node in nodes if node.Class() == "BackdropNode"]
+
+    if not backdrop_nodes:
+        nuke.alert("Please select at least one Backdrop node!")
+        return
+    
+    for i in backdrop_nodes:
+
+        text, align, icon, title = get_label_param(i)     
+
+        if align != "left":
+            if icon != "":
+                new_title = f"<left>{icon}{title}</left>"
+                
+            elif icon == "":
+                new_title = f"<left>{title}</left>"
+            else:
+                pass
+
+            i["label"].setValue(new_title)
+            
+
+def label_center(nodes):
+    backdrop_nodes = [node for node in nodes if node.Class() == "BackdropNode"]
+
+    if not backdrop_nodes:
+        nuke.alert("Please select at least one Backdrop node!")
+        return
+    
+    for i in backdrop_nodes:
+
+        text, align, icon, title = get_label_param(i)     
+
+        if align != "center":
+            if icon != "":
+                new_title = f"<center>{icon}{title}</center>"
+                
+            elif icon == "":
+                new_title = f"<center>{title}</center>"
+            else:
+                pass
+
+            i["label"].setValue(new_title)
+
+def label_right(nodes):
+    backdrop_nodes = [node for node in nodes if node.Class() == "BackdropNode"]
+
+    if not backdrop_nodes:
+        nuke.alert("Please select at least one Backdrop node!")
+        return
+    
+    for i in backdrop_nodes:
+
+        text, align, icon, title = get_label_param(i)     
+
+        if align != "right":
+            if icon != "":
+                new_title = f"<right>{icon}{title}</right>"
+                
+            elif icon == "":
+                new_title = f"<right>{title}</right>"
+            else:
+                pass
+
+            i["label"].setValue(new_title)
 
 def hex_to_nuke_color(hex_color):
     """
