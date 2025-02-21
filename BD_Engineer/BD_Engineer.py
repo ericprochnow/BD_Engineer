@@ -632,10 +632,10 @@ def createBackdrop(icon, text, color):
         n["z_order"].setValue(zOrder)
 
         if icon == "": 
-            n["label"].setValue(f"<center>{input_text}</center>")
+            n["label"].setValue(f"<div align='center'>{input_text}</center>")
         else:
             icon = icon.replace(os.sep, "/")
-            n["label"].setValue(f"<center><img src='{icon}'>{input_text}</center>")
+            n["label"].setValue(f"<div align='center'><img src='{icon}'>{input_text}</div>")
 
         n['xpos'].setValue(bdX)
         n['ypos'].setValue(bdY)
@@ -791,36 +791,32 @@ def randomizeBackdropColor(nodes):
 
 
 def get_label_param(node):
-
-    if node.Class() == "BackdropNode":
-
-        # get label value
-        text = node["label"].value()
-        
-        # get alignment
-        align = re.search(r"<(left|center|right)>\s*(.*?)\s*</\1>", text).group(1)
-        
-        # get icon
-        match_img = re.search(r"(<img .*?>)", text)
-        if match_img:
-            icon = match_img.group(1)
-        else:
-            icon = ""
-
-        # get label text
-        if icon != "":
-            match_title = re.search(r"<(center|left|right)>.*?>(.*?)</\1>", text)
-            title = match_title.group(2)
-        else:
-            match_title = re.search(r"<(center|left|right)>(.*?)</\1>", text)
-            title = match_title.group(2)
-
-        
-        return text, align, icon, title
     
+    if node.Class() == "BackdropNode":
+        # Get label value
+        text = node["label"].value()
+
+        # Get alignment and content inside the div
+        match = re.search(r'<div align=["\'](left|center|right)["\']>\s*(.*?)\s*</(?:div|center|left|right)>', text, re.DOTALL)
+        if not match:
+            print("No valid label format found!")
+            return None  # Handle missing div case safely
+
+        align = match.group(1)  # "left", "center", or "right"
+        content = match.group(2).strip()  # Everything inside the div
+
+        # Extract icon if present
+        match_img = re.search(r"(<img .*?>)", content)
+        icon = match_img.group(1) if match_img else ""
+
+        # Extract label text (remove icon if present)
+        title = re.sub(r"<img .*?>", "", content).strip()
+
+        return text, align, icon, title
+
     else:
-        print("no backdrop sel!")
-        return
+        print("No backdrop selected!")
+        return None
     
 
 
@@ -839,10 +835,10 @@ def label_left(nodes):
 
         if align != "left":
             if icon != "":
-                new_title = f"<left>{icon}{title}</left>"
+                new_title = f"<div align='left'>{icon}{title}</div>"
                 
             elif icon == "":
-                new_title = f"<left>{title}</left>"
+                new_title = f"<div align='left'>{title}</div>"
             else:
                 pass
 
@@ -862,10 +858,10 @@ def label_center(nodes):
 
         if align != "center":
             if icon != "":
-                new_title = f"<center>{icon}{title}</center>"
+                new_title = f"<div align='center'>{icon}{title}</center>"
                 
             elif icon == "":
-                new_title = f"<center>{title}</center>"
+                new_title = f"<div align='center'>{title}</center>"
             else:
                 pass
 
@@ -884,10 +880,10 @@ def label_right(nodes):
 
         if align != "right":
             if icon != "":
-                new_title = f"<right>{icon}{title}</right>"
+                new_title = f"<div align='right'>{icon}{title}</center>"
                 
             elif icon == "":
-                new_title = f"<right>{title}</right>"
+                new_title = f"<div align='right'>{title}</right>"
             else:
                 pass
 
