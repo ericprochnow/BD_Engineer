@@ -5,15 +5,16 @@
 ______
 
 <p align="center">
-<img width="725" alt="BDE_main" src="https://github.com/user-attachments/assets/a027b9d8-19c9-475d-acda-5061a74699c0" />
+<img width="760" alt="BDE_main" src="https://github.com/user-attachments/assets/7ca4bbce-9863-4ec8-a979-933d0cd9181b" />
 </p>
+
 
 ______
 
 ### Key Features:
 - Create, modify and update backdrop nodes with ease.
 - Simple and modern UI (usable as floating or dockable window).
-- Building your own Collection of customizable backdrop templates, accessable with one button click.
+- Building your own collection of customizable backdrop templates, accessable with one button click.
 - Custom settings area for managing your backdrop templates. (full control over text, color and icon).
 
 ______
