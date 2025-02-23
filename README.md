@@ -29,4 +29,4 @@ ______
 - modify the ui_settings.py file to your individual needs (change icon directory, text- and button size)  
 ______
 
-# How to install & use (video guide)
+# Video Guide
