@@ -224,9 +224,9 @@ class BD_Engineer(QtWidgets.QWidget):
 
         # Define button labels and function placeholders
         labelPos_button_data = [
-            ("1", self.label_left, "Align backdrop label text to the left."),
-            ("2", self.label_center, "Align backdrop label text to the center."),
-            ("3",  self.label_right,"Align backdrop label text to the right."),
+            ("<", self.label_left, "Align backdrop label text to the left."),
+            ("|", self.label_center, "Align backdrop label text to the center."),
+            (">",  self.label_right,"Align backdrop label text to the right."),
             ]
         
         self.labelPosButtons = []
@@ -528,7 +528,7 @@ class ConfigEditor(QtWidgets.QDialog):
         new_config_text = "BUTTONS = [\n"
 
         for button in buttons:
-            new_config_text += f"    {repr(button)},\n\n"
+            new_config_text += f"{repr(button)},\n\n"
             
         new_config_text += "]\n"
         try:
@@ -632,7 +632,7 @@ def createBackdrop(icon, text, color):
         n["z_order"].setValue(zOrder)
 
         if icon == "": 
-            n["label"].setValue(f"<div align='center'>{input_text}</center>")
+            n["label"].setValue(f"<div align='center'>{input_text}</div>")
         else:
             icon = icon.replace(os.sep, "/")
             n["label"].setValue(f"<div align='center'><img src='{icon}'>{input_text}</div>")
@@ -690,30 +690,39 @@ def updateTitle(nodes):
     
     for i in backdrop_nodes:
 
-        text = i["label"].value()
-        
-        
-        match = re.search(r"'>\s*(.*?)\s*</center>", text)
-        if match:
-            current_title = match.group(1)
-        else:
-            match = re.search(r"<center>\s*(.*?)\s*</center>", text)
-            current_title = match.group(1)
-        
-        
-        match_img = re.search(r"(<img .*?>)", text)
-        if match_img:
-            icon = match_img.group(1)
-        else:
-            icon =""
+        text, align, icon, title = get_label_param(i)
             
 
-        new_title = nuke.getInput(f"Update Label Text ({current_title})", f"{current_title}")
+        new_title = nuke.getInput(f"Update Label Text ({title})", f"{title}")
 
-        if icon != "":
-            new_title = f"<center>{icon}{new_title}</center>"
-        else:
-            new_title = f"<center>{new_title}</center>"
+        if align == "left":
+                if icon != "":
+                    new_title = f"<div align='left'>{icon}{new_title}</div>"
+                    
+                elif icon == "":
+                    new_title = f"<div align='left'>{new_title}</div>"
+                else:
+                    pass
+
+        elif align == "center":
+            if icon != "":
+                new_title = f"<div align='center'>{icon}{new_title}</div>"
+                
+            elif icon == "":
+                new_title = f"<div align='center'>{new_title}</div>"
+            else:
+                pass
+
+
+        elif align == "right":
+            if icon != "":
+                new_title = f"<div align='right'>{icon}{new_title}</div>"
+                
+            elif icon == "":
+                new_title = f"<div align='right'>{new_title}</div>"
+            else:
+                pass
+
 
         i["label"].setValue(new_title)
         
@@ -732,17 +741,13 @@ def updateTextsize(nodes):
 
         text = i["label"].value()
         
-        match = re.search(r"'>\s*(.*?)\s*</center>", text)
-        if match:
-            current_title = match.group(1)
-        else:
-            match = re.search(r"<center>\s*(.*?)\s*</center>", text)
-            current_title = match.group(1)
 
-        current_size = int(i["note_font_size"].value())  # Ensure it's an integer
+        text, align, icon, title = get_label_param(i)
+
+        current_size = int(i["note_font_size"].value())  
 
         while True: 
-            new_size = nuke.getInput(f"Text Size ({current_title})", str(current_size))
+            new_size = nuke.getInput(f"Text Size ({title})", str(current_size))
 
             if new_size is None:  
                 return
@@ -756,7 +761,6 @@ def updateTextsize(nodes):
 def toggleFillBorder(nodes):
     """
     Toggles the 'appearance' knob of selected Backdrop nodes between Fill (0) and Border (1).
-    If no Backdrop nodes are selected, an alert is shown.
     """
     backdrop_nodes = [node for node in nodes if node.Class() == "BackdropNode"]
 
@@ -776,7 +780,6 @@ def toggleFillBorder(nodes):
 def randomizeBackdropColor(nodes):
     """
     Assigns a random color to all selected Backdrop nodes.
-    If no Backdrop nodes are selected, an alert is shown.
     """
     backdrop_nodes = [node for node in nodes if node.Class() == "BackdropNode"]
 
@@ -787,8 +790,6 @@ def randomizeBackdropColor(nodes):
     for node in backdrop_nodes:
         random_color = random.randint(0, 0xFFFFFF)  # Generate a random RGB color
         node["tile_color"].setValue(random_color)
-
-
 
 def get_label_param(node):
     
@@ -817,10 +818,6 @@ def get_label_param(node):
     else:
         print("No backdrop selected!")
         return None
-    
-
-
-
 
 def label_left(nodes):
     backdrop_nodes = [node for node in nodes if node.Class() == "BackdropNode"]
@@ -844,7 +841,6 @@ def label_left(nodes):
 
             i["label"].setValue(new_title)
             
-
 def label_center(nodes):
     backdrop_nodes = [node for node in nodes if node.Class() == "BackdropNode"]
 
@@ -858,10 +854,10 @@ def label_center(nodes):
 
         if align != "center":
             if icon != "":
-                new_title = f"<div align='center'>{icon}{title}</center>"
+                new_title = f"<div align='center'>{icon}{title}</div>"
                 
             elif icon == "":
-                new_title = f"<div align='center'>{title}</center>"
+                new_title = f"<div align='center'>{title}</div>"
             else:
                 pass
 
@@ -880,10 +876,10 @@ def label_right(nodes):
 
         if align != "right":
             if icon != "":
-                new_title = f"<div align='right'>{icon}{title}</center>"
+                new_title = f"<div align='right'>{icon}{title}</div>"
                 
             elif icon == "":
-                new_title = f"<div align='right'>{title}</right>"
+                new_title = f"<div align='right'>{title}</div>"
             else:
                 pass
 
@@ -892,7 +888,6 @@ def label_right(nodes):
 def hex_to_nuke_color(hex_color):
     """
     Convert a hex color string (e.g., "#RRGGBB") to a 32-bit integer in the format Nuke expects.
-    Appends an alpha value of FF.
     """
     # Remove the '#' if present
     hex_color = hex_color.lstrip('#')
