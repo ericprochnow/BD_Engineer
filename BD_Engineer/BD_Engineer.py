@@ -80,7 +80,7 @@ available_icons = []
 # ----------------------------------------------
 
 
-# Main UI Class
+# Main UI
 
 class BD_Engineer(QtWidgets.QWidget):
     
@@ -188,7 +188,7 @@ class BD_Engineer(QtWidgets.QWidget):
             ("Label Size",  self.title_size,"Update the label size of all selected backdrops."),
             ("Label Text", self.title,"Update the label text of all selected backdrops."),
             ("Appearance", self.toggleBorder,"Switch the appearance ofall selected backdrops.\nBorder or Fill is possible."),
-            ("Color Rand", self.randomizeColor,"Use a randomized color on all selected backdrops."),
+            ("Color", self.setColor,"Change the color of all selected backdrops."),
         ]
 
         # Create Modify buttons 
@@ -318,8 +318,26 @@ class BD_Engineer(QtWidgets.QWidget):
     def toggleBorder(self):
         toggleFillBorder(nuke.selectedNodes())
 
-    def randomizeColor(self):
-        randomizeBackdropColor(nuke.selectedNodes())
+    def setColor(self):
+        """
+        Set a new color to all selected Backdrop nodes.
+        """
+        backdrop_nodes = [node for node in nuke.selectedNodes() if node.Class() == "BackdropNode"]
+
+        if not backdrop_nodes:
+            nuke.alert("Please select at least one Backdrop node!")
+            return
+            
+
+        color = QtWidgets.QColorDialog.getColor()
+        if color.isValid():
+            hex_color = color.name()
+
+            for node in backdrop_nodes:
+                node["tile_color"].setValue(hex_to_nuke_color(hex_color))
+
+        else:
+            pass
     
     def label_left(self):
         label_left(nuke.selectedNodes())
@@ -333,7 +351,7 @@ class BD_Engineer(QtWidgets.QWidget):
     def open_settings(self):
         open_config_editor()
 
-# Settings Window UI Class
+# Settings Window UI 
 
 class ConfigEditor(QtWidgets.QDialog):
 
@@ -776,20 +794,6 @@ def toggleFillBorder(nodes):
 
         elif current_value == "Fill":
             node["appearance"].setValue("Border")
-
-def randomizeBackdropColor(nodes):
-    """
-    Assigns a random color to all selected Backdrop nodes.
-    """
-    backdrop_nodes = [node for node in nodes if node.Class() == "BackdropNode"]
-
-    if not backdrop_nodes:
-        nuke.alert("Please select at least one Backdrop node!")
-        return
-
-    for node in backdrop_nodes:
-        random_color = random.randint(0, 0xFFFFFF)  # Generate a random RGB color
-        node["tile_color"].setValue(random_color)
 
 def get_label_param(node):
     
