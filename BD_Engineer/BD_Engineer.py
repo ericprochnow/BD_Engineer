@@ -249,7 +249,7 @@ class BD_Engineer(QtWidgets.QWidget):
         self.mainLayout.addWidget(self.labelPosContainer, alignment=QtCore.Qt.AlignCenter)
 
         # Add space after modify buttons
-        self.mainLayout.addSpacing(30)
+        self.mainLayout.addSpacing(60)
 
 
 
@@ -263,7 +263,7 @@ class BD_Engineer(QtWidgets.QWidget):
         # Ensure rich text format is used
         self.creditLabel.setTextFormat(QtCore.Qt.TextFormat.RichText)
         self.creditLabel.setOpenExternalLinks(True)
-        self.creditLabel.setStyleSheet(f"QLabel {{font-size:10px; line-height: 12px;}}")
+        self.creditLabel.setStyleSheet(f"QLabel {{font-size:7px; line-height: 8px;}}")
         self.creditLabel.setAlignment(QtCore.Qt.AlignCenter)
         
         # Settings Button Layout
