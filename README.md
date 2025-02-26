@@ -5,7 +5,7 @@
 ______
 
 <p align="center">
-<img width="760" alt="BDE_main" src="https://github.com/user-attachments/assets/7ca4bbce-9863-4ec8-a979-933d0cd9181b" />
+ <img width="734" alt="BDE_main" src="https://github.com/user-attachments/assets/777f3def-80c9-41af-b87e-6246a015c052" />
 </p>
 
 
