@@ -93,6 +93,11 @@ class BD_Engineer(QtWidgets.QWidget):
         # Keep window always on top
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
 
+        self.bd_button_width = button_width
+        self.bd_button_height = button_height
+        self.bd_button_spacing = button_spacing
+
+
 
 
         # --- Main Layout  ---
@@ -109,6 +114,20 @@ class BD_Engineer(QtWidgets.QWidget):
         self.sectionTitle.setStyleSheet(f"font-size: {main_title_size}px; font-weight: bold;")
         self.mainLayout.addWidget(self.sectionTitle)
 
+        self.mainLayout.addSpacing(20)
+
+
+
+
+        # --- Add Seperator Line ---
+        self.separator = QtWidgets.QFrame()
+        self.separator.setFrameShape(QtWidgets.QFrame.HLine) 
+        self.separator.setFrameShadow(QtWidgets.QFrame.Sunken)  
+        self.separator.setContentsMargins(0, 5, 0, 5)
+        self.mainLayout.addWidget(self.separator)
+
+        # Add space before Modify Backdrop title
+        self.mainLayout.addSpacing(20)
 
 
 
@@ -122,10 +141,6 @@ class BD_Engineer(QtWidgets.QWidget):
 
 
         # --- Backdrop Button Section ---
-        self.bd_button_width = button_width
-        self.bd_button_height = button_height
-        self.bd_button_spacing = button_spacing
-        
         self.buttonLayout = QtWidgets.QVBoxLayout()
         self.buttonLayout.setSpacing(self.bd_button_spacing)  
         self.buttonLayout.setAlignment(QtCore.Qt.AlignCenter)  #
@@ -151,16 +166,16 @@ class BD_Engineer(QtWidgets.QWidget):
         self.buttonContainer.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self.mainLayout.addWidget(self.buttonContainer, alignment=QtCore.Qt.AlignCenter)
 
-        self.mainLayout.addSpacing(20)
+        self.mainLayout.addSpacing(15)
 
 
 
         # --- Add Seperator Line ---
-        self.separator = QtWidgets.QFrame()
-        self.separator.setFrameShape(QtWidgets.QFrame.HLine) 
-        self.separator.setFrameShadow(QtWidgets.QFrame.Sunken)  
-        self.separator.setContentsMargins(0, 5, 0, 5)
-        self.mainLayout.addWidget(self.separator)
+        self.separator_2 = QtWidgets.QFrame()
+        self.separator_2.setFrameShape(QtWidgets.QFrame.HLine) 
+        self.separator_2.setFrameShadow(QtWidgets.QFrame.Sunken)  
+        self.separator_2.setContentsMargins(0, 5, 0, 5)
+        self.mainLayout.addWidget(self.separator_2)
 
         # Add space before Modify Backdrop title
         self.mainLayout.addSpacing(20)
@@ -351,6 +366,9 @@ class BD_Engineer(QtWidgets.QWidget):
     def open_settings(self):
         open_config_editor()
 
+    def open_bd_creator(self):
+        open_backdrop_creator()
+        
 # Settings Window UI 
 
 class ConfigEditor(QtWidgets.QDialog):
@@ -712,6 +730,9 @@ def updateTitle(nodes):
             
 
         new_title = nuke.getInput(f"Update Label Text ({title})", f"{title}")
+
+        if not new_title:
+            return
 
         if align == "left":
                 if icon != "":
