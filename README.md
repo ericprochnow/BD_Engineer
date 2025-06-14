@@ -27,3 +27,6 @@ ______
 ______
 
 # Video Guide
+[![Watch the video](https://img.youtube.com/vi/m1Ngzz_8UPs/maxresdefault.jpg)](https://youtu.be/m1Ngzz_8UPs)
+
+### [Watch this video on YouTube](https://youtu.be/m1Ngzz_8UPs)
